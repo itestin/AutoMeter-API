@@ -25,7 +25,7 @@ public class ExecuteplanParams {
     /**
      * Key
      */
-    private Long keyname;
+    private String keyname;
 
     /**
      * 值
@@ -103,7 +103,7 @@ public class ExecuteplanParams {
      *
      * @return keyname - Key
      */
-    public Long getKeyname() {
+    public String getKeyname() {
         return keyname;
     }
 
@@ -112,7 +112,7 @@ public class ExecuteplanParams {
      *
      * @param keyname Key
      */
-    public void setKeyname(Long keyname) {
+    public void setKeyname(String keyname) {
         this.keyname = keyname;
     }
 

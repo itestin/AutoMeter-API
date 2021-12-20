@@ -6,8 +6,11 @@ import com.zoctan.api.service.ExecuteplanParamsService;
 import com.zoctan.api.core.service.AbstractService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tk.mybatis.mapper.entity.Condition;
 
 import javax.annotation.Resource;
+import java.util.List;
+import java.util.Map;
 
 /**
 * @author SeasonFan
@@ -18,5 +21,21 @@ import javax.annotation.Resource;
 public class ExecuteplanParamsServiceImpl extends AbstractService<ExecuteplanParams> implements ExecuteplanParamsService {
 @Resource
 private ExecuteplanParamsMapper executeplanParamsMapper;
+
+    @Override
+    public void updateParams(ExecuteplanParams params) {
+        executeplanParamsMapper.updateParams(params);
+    }
+
+    @Override
+    public List<ExecuteplanParams> getParamsbyepid(Map<String, Object> params) {
+        return executeplanParamsMapper.getParamsbyepid(params);
+    }
+
+    @Override
+    public int ifexist(Condition condition) {
+        return countByCondition(condition);
+    }
+
 
 }
