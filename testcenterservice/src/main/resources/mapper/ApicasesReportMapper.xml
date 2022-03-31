@@ -25,12 +25,20 @@
   </resultMap>
 
   <select id="findApicasereportWithName" resultMap="BaseResultMap">
-    SELECT b.casename,b.apiname,a.status,a.url,a.requestmethod,a.batchname,b.deployunitname,a.respone,a.assertvalue,a.runtime,a.expect,a.errorinfo,a.create_time,a.requestheader,a.requestdatas
-    FROM apicases_report a inner join apicases b on a.caseid=b.id
+    SELECT b.casename,c.deployunitname,d.apiname,a.*
+    FROM apicases_report a inner join apicases b inner join deployunit c inner join api d
+    on a.caseid=b.id and b.apiid=d.id and b.deployunitid=c.id
     <where>
       <if test="testplanid != null and testplanid != ''">a.testplanid =#{testplanid}</if>
       <if test="batchname != null  and batchname != ''">and a.batchname =#{batchname}</if>
     </where>
+    order by a.create_time desc
+  </select>
+
+  <select id="findApicasereportWithNameandStatus" resultMap="BaseResultMap">
+    SELECT b.casename,b.apiname,a.status,a.url,a.requestmethod,a.batchname,b.deployunitname,a.respone,a.assertvalue,a.runtime,a.expect,a.errorinfo,a.create_time,a.requestheader,a.requestdatas
+    FROM apicases_report a inner join apicases b on a.caseid=b.id
+    where a.testplanid =#{testplanid} and a.batchname =#{batchname} and a.status =#{status}
     order by a.create_time desc
   </select>
 
@@ -67,4 +75,10 @@
     SELECT b.casename,b.apiname,a.requestheader,a.requestdatas,a.status,a.batchname,b.deployunitname,a.respone,a.assertvalue,a.runtime,a.expect,a.errorinfo,a.create_time
     FROM apicases_report a inner join apicases b on a.caseid=b.id
   </select>
+
+  <select id="getreportbyplanandbatchstatus" resultMap="BaseResultMap">
+    SELECT *
+    FROM apicases_report a where testplanid =#{testplanid} and batchname =#{batchname} and status=#{status}
+  </select>
+
 </mapper>

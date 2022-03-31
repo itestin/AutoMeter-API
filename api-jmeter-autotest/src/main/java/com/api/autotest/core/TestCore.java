@@ -77,7 +77,6 @@ public class TestCore {
         ArrayList<HashMap<String, String>> testconditionList = GetConditionByPlanIDAndConditionType(ObjectID, "前置条件", "测试用例");
         if (testconditionList.size() > 0) {
             long ConditionID = Long.parseLong(testconditionList.get(0).get("id"));
-
             ArrayList<HashMap<String, String>> conditionorderList =GetConditionOrderByID(ConditionID);
             if(conditionorderList.size()>0)
             {
@@ -100,6 +99,12 @@ public class TestCore {
                         testCondition.ScriptCondition(ConditionID, requestObject);
                         logger.info("TestCore 完成处理用例前置条件顺序-脚本子条件-============：");
                     }
+                    if(conditionorder.get("subconditiontype").equals("延时"))
+                    {
+                        logger.info("TestCore 开始处理用例前置条件顺序-延时子条件-============：");
+                        testCondition.DelayCondition(ConditionID, requestObject);
+                        logger.info("TestCore 完成处理用例前置条件顺序-延时子条件-============：");
+                    }
                 }
             }
             else
@@ -114,18 +119,22 @@ public class TestCore {
                 logger.info("TestCore 开始处理用例前置条件-脚本子条件-============：");
                 testCondition.ScriptCondition(ConditionID, requestObject);
                 logger.info("TestCore 完成处理用例前置条件-脚本子条件-============：");
+                //处理脚本条件
+                logger.info("TestCore 开始处理用例前置条件-延时子条件-============：");
+                testCondition.DelayCondition(ConditionID, requestObject);
+                logger.info("TestCore 完成处理用例前置条件-延时子条件-============：");
             }
         }
     }
 
     // 发送http请求
-    public ResponeData request(RequestObject requestObject) throws Exception {
-        ResponeData result = testHttp.doService(requestObject);
+    public TestResponeData request(RequestObject requestObject) throws Exception {
+        TestResponeData result = testHttp.doService(requestObject);
         return result;
     }
 
     //断言
-    public String FixAssert(TestAssert TestAssert, List<ApicasesAssert> apicasesAssertList, ResponeData responeData) throws Exception {
+    public String FixAssert(TestAssert TestAssert, List<ApicasesAssert> apicasesAssertList, TestResponeData responeData) throws Exception {
         String AssertInfo = "";
         for (ApicasesAssert apicasesAssert : apicasesAssertList) {
 
@@ -245,7 +254,7 @@ public class TestCore {
                 Map<String, Object> atMap = new HashMap<>();;
                 //1.是否通知所有人
                 atMap.put("isAtAll", true);
-                Map<String, Object> reqMap = Maps.newHashMap();
+                Map<String, Object> reqMap =new HashMap<>(); //Maps.newHashMap();
                 reqMap.put("msgtype", "text");
                 reqMap.put("text", contentMap);
                 reqMap.put("at", atMap);

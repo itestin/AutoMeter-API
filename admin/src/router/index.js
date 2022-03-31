@@ -4,7 +4,7 @@ import Router from 'vue-router'
 
 /* layout */
 import Layout from '../views/layout/Layout'
-import nestedRouterTestManager from './modules/nested'
+// import nestedRouterTestManager from './modules/nested'
 // import nestedRouterSubCondition from './modules/subconditionnested'
 
 const _import = require('./_import_' + process.env.NODE_ENV)
@@ -38,25 +38,12 @@ export const constantRouterMap = [
   {
     path: '',
     component: Layout,
-    name: 'dashboard',
+    name: 'Dashboard',
     icon: 'dashboard',
     children: [
-      { path: 'dashboard', name: '首页', component: _import('dashboard/index'), meta: { title: '首页', icon: 'dashboard', noCache: true }}
+      { path: 'Dashboard', name: '首页', component: _import('dashboard/index'), meta: { title: '首页', icon: 'dashboard', noCache: true }}
     ]
   }
-  // {
-  //   path: '',
-  //   component: Layout,
-  //   redirect: 'dashboard',
-  //   icon: 'dashboard',
-  //   noDropDown: true,
-  //   children: [{
-  //     path: 'dashboard',
-  //     name: '控制台',
-  //     component: _import('dashboard/index'),
-  //     meta: { title: 'dashboard', noCache: true }
-  //   }]
-  // }
 ]
 
 export default new Router({
@@ -66,20 +53,6 @@ export default new Router({
 })
 
 export const asyncRouterMap = [
-  // {
-  //   path: '/assets',
-  //   component: Layout,
-  //   name: '资产管理',
-  //   alwaysShow: true,
-  //   activeMenu: '/assets',
-  //   icon: 'asset',
-  //   children: [
-  //     { path: 'machine/list', name: '服务器管理', component: _import('assets/machine/index'), meta: { title: '服务器管理', permission: ['machine:list'] }},
-  //     //  { path: 'role/list', name: '测试点', component: _import('system/role/list'), meta: { permission: ['role:detail'] }},
-  //     { path: 'cases/apicases/list', name: '测试用例', component: _import('assets/cases/apicases/index'), meta: { title: '测试用例', permission: ['apicases:list'] }},
-  //     { path: 'cases/apicasesvariables/list', name: '用例变量', component: _import('assets/cases/apicasesvariables/index'), meta: { title: '用例变量', permission: ['ApicasesVariables:list'] }}
-  //   ]
-  // },
   {
     path: '/enviroment',
     component: Layout,
@@ -107,7 +80,20 @@ export const asyncRouterMap = [
       // { path: 'apiparams/list', name: 'API参数', component: _import('deployunit/apiparams/index'), meta: { title: 'API参数', permission: ['apiparams:list'] }}
     ]
   },
-  nestedRouterTestManager,
+  {
+    path: '/assets',
+    component: Layout,
+    name: '测试管理',
+    alwaysShow: true,
+    activeMenu: '/assets',
+    icon: 'testmanager',
+    children: [
+      { path: 'apicases/list', name: '用例库', component: _import('assets/cases/apicases/index'), meta: { title: '用例库', permission: ['apicases:list'] }, icon: 'testmanager' },
+      { path: 'project/list', name: '项目/迭代', component: _import('assets/project/index'), meta: { title: '项目/迭代', permission: ['project:list'] }, icon: 'testmanager' }
+      // { path: 'apiparams/list', name: 'API参数', component: _import('deployunit/apiparams/index'), meta: { title: 'API参数', permission: ['apiparams:list'] }}
+    ]
+  },
+  // nestedRouterTestManager,
   // nestedRouterSubCondition,
 
   {
@@ -137,10 +123,10 @@ export const asyncRouterMap = [
     name: '报告中心',
     icon: 'report',
     children: [
-      { path: 'testconditionreport/list', name: '条件执行报告', component: _import('reportcenter/testconditionreport/index'), meta: { title: '条件执行报告', permission: ['testconditionreport:list'] }},
-      { path: 'apireport/list', name: '功能测试报告', component: _import('reportcenter/apireport/index'), meta: { title: '功能测试报告', permission: ['apireport:list'] }},
-      { path: 'apireportstatics/list', name: '功能统计报告', component: _import('reportcenter/apireportstatics/index'), meta: { title: '功能统计报告', permission: ['apireportstatics:list'] }},
-      //  { path: 'apireport/list', name: '功能报告分析', component: _import('reportcenter/apireport/index'), meta: { permission: ['apireport:list'] }},
+      // { path: 'testconditionreport/list', name: '条件执行报告', component: _import('reportcenter/testconditionreport/index'), meta: { title: '条件执行报告', permission: ['testconditionreport:list'] }},
+      { path: 'apinewreport/list', name: '集合功能报告', component: _import('reportcenter/apinewreport/index'), meta: { title: '集合功能报告', permission: ['apireport:list'] }},
+      { path: 'apireport/list', name: '功能报告明细', component: _import('reportcenter/apireport/index'), meta: { title: '功能报告明细', permission: ['apireport:list'] }},
+      // { path: 'apireportstatics/list', name: '功能统计报告', component: _import('reportcenter/apireportstatics/index'), meta: { title: '功能统计报告', permission: ['apireportstatics:list'] }},
       { path: 'apiperformancereport/list', name: '性能明细报告', component: _import('reportcenter/apiperformancereport/index'), meta: { title: '性能明细报告', permission: ['apiperformancereport:list'] }},
       { path: 'apiperformancestatistics/list', name: '性能统计报告', component: _import('reportcenter/apiperformancestatistics/index'), meta: { title: '性能统计报告', permission: ['apiperformancestatistics:list'] }}
     ]
@@ -153,8 +139,9 @@ export const asyncRouterMap = [
     children: [
       { path: 'condition/list', name: '父条件管理', component: _import('condition/condition/index'), meta: { title: '父条件管理', permission: ['condition:list'] }},
       { path: 'apicondition/list', name: '接口子条件', component: _import('condition/apicondition/index'), meta: { title: '接口子条件', permission: ['apicondition:list'] }},
-      { path: 'dbcondition/list', name: 'DB子条件', component: _import('condition/dbcondition/index'), meta: { title: 'DB子条件', permission: ['dbcondition:list'] }},
-      { path: 'scriptcondition/list', name: '脚本子条件', component: _import('condition/scriptcondition/index'), meta: { title: '脚本子条件', permission: ['scriptcondition:list'] }}
+      { path: 'dbcondition/list', name: '数据库子条件', component: _import('condition/dbcondition/index'), meta: { title: 'DB子条件', permission: ['dbcondition:list'] }},
+      { path: 'scriptcondition/list', name: '脚本子条件', component: _import('condition/scriptcondition/index'), meta: { title: '脚本子条件', permission: ['scriptcondition:list'] }},
+      { path: 'delaycondition/list', name: '延时子条件', component: _import('condition/delaycondition/index'), meta: { title: '延时子条件', permission: ['delaycondition:list'] }}
     ]
   },
 
@@ -165,7 +152,8 @@ export const asyncRouterMap = [
     icon: 'paras',
     children: [
       { path: 'variables/list', name: '随机变量', component: _import('testvariables/variables/index'), meta: { title: '随机变量', permission: ['variables:list'] }},
-      { path: 'testvariables/list', name: '接口变量', component: _import('testvariables/testvariables/index'), meta: { title: '接口变量', permission: ['testvariables:list'] }}
+      { path: 'testvariables/list', name: '接口变量', component: _import('testvariables/testvariables/index'), meta: { title: '接口变量', permission: ['testvariables:list'] }},
+      { path: 'dbvariables/list', name: '数据库变量', component: _import('testvariables/dbvariables/index'), meta: { title: '数据库变量', permission: ['dbvariables:list'] }}
       // { path: 'apicasesvariables/list', name: '绑定变量', component: _import('assets/cases/apicasesvariables/index'), meta: { title: '绑定变量', permission: ['testvariables:list'] }}
       // { path: 'testvariablesvalue/list', name: '变量结果', component: _import('testvariables/testvariablesvalue/index'), meta: { title: '变量结果', permission: ['testvariablesvalue:list'] }}
     ]

@@ -380,9 +380,18 @@ public class ApiController {
 
     @DeleteMapping("/{id}")
     public Result delete(@PathVariable Long id) {
-        apiService.deleteById(id);
-        apiParamsService.deletebyApiid(id);
-        return ResultGenerator.genOkResult();
+
+        List<Apicases>apicasesList= apicasesService.getcasebyapiid(id);
+        if(apicasesList.size()>0)
+        {
+            return ResultGenerator.genFailedResult("当前API还存在测试用例，无法删除！");
+        }
+        else
+        {
+            apiService.deleteById(id);
+            apiParamsService.deletebyApiid(id);
+            return ResultGenerator.genOkResult();
+        }
     }
 
     @PatchMapping
@@ -437,8 +446,8 @@ public class ApiController {
 
 
     @GetMapping("/apibydeploy")
-    public Result listbydeploy(@RequestParam String deployunitname) {
-        List<Api> list = apiService.listAllbydeploy(deployunitname);
+    public Result listbydeploy(@RequestParam long deployunitid) {
+        List<Api> list = apiService.listAllbydeploy(deployunitid);
         return ResultGenerator.genOkResult(list);
     }
 

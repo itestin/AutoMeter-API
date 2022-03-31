@@ -5,6 +5,7 @@ import com.api.autotest.core.TestCore;
 import com.api.autotest.dto.ApicasesReportstatics;
 import com.api.autotest.dto.RequestObject;
 import com.api.autotest.dto.ResponeData;
+import com.api.autotest.dto.TestResponeData;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
@@ -23,8 +24,8 @@ public class HttpApiFunction extends AbstractJavaSamplerClient {
     public Arguments getDefaultParameters() {
         Arguments params = new Arguments();
         //定义一个参数，显示到Jmeter的参数列表中，第一个参数为参数默认的显示名称，第二个参数为默认值
-        params.addArgument("DispatchIds", "11");
-        params.addArgument("SlaverId", "12");
+        params.addArgument("DispatchIds", "14");
+        params.addArgument("SlaverId", "1");
         params.addArgument("mysqlurl", "/opt/");
         params.addArgument("mysqlusername", "/opt/");
         params.addArgument("mysqlpassword", "/opt/");
@@ -77,8 +78,8 @@ public class HttpApiFunction extends AbstractJavaSamplerClient {
                     try {
                         //增加条件处理逻辑，bug用例前置api还未执行，变量未产生，用例的参数值是错的
                         Core.FixCondition(requestObject);
-                        ResponeData responeData = Core.request(requestObject);// SendCaseRequest(requestObject, Core);
-                        ActualResult = responeData.getRespone();
+                        TestResponeData responeData = Core.request(requestObject);// SendCaseRequest(requestObject, Core);
+                        ActualResult = responeData.getResponeContent();
                         //断言
                         AssertInfo = Core.FixAssert(TestAssert, requestObject.getApicasesAssertList(), responeData);
                     } catch (Exception ex) {
@@ -142,8 +143,8 @@ public class HttpApiFunction extends AbstractJavaSamplerClient {
     }
 
     //用例发送请求
-    private ResponeData SendCaseRequest(RequestObject ob, TestCore core) throws Exception {
-        ResponeData Result = core.request(ob);
+    private TestResponeData SendCaseRequest(RequestObject ob, TestCore core) throws Exception {
+        TestResponeData Result = core.request(ob);
         return Result;
     }
 
@@ -225,8 +226,8 @@ public class HttpApiFunction extends AbstractJavaSamplerClient {
 
 
         Arguments params = new Arguments();
-        params.addArgument("DispatchIds", "93");
-        params.addArgument("SlaverId", "23");
+        params.addArgument("DispatchIds", "14");
+        params.addArgument("SlaverId", "1");
         params.addArgument("mysqlurl", "jdbc:mysql://127.0.0.1:3306/testcenter?useUnicode=true&useSSL=false&allowMultiQueries=true&characterEncoding=utf-8&useLegacyDatetimeCode=false&serverTimezone=UTC");
         params.addArgument("mysqlusername", "test");
         params.addArgument("mysqlpassword", "test");
