@@ -264,7 +264,7 @@ public class TestPlanCaseController {
                     TestPlanCaseController.log.info("性能任务-。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。调用jmeter完成..。。。。。。。。。。。。。。。。。。。。。。。。。" + dispatch.getId());
                 }
             } catch (Exception ex) {
-                dispatchMapper.updatedispatchstatusandmemo("调度异常", "执行Slaver机异常："+ex.getMessage(), dispatch.getSlaverid(), dispatch.getExecplanid(), dispatch.getBatchid(), dispatch.getTestcaseid());
+                dispatchMapper.updatedispatchstatusandmemo("调度异常", "执行机Slaver运行性能测试异常："+ex.getMessage(), dispatch.getSlaverid(), dispatch.getExecplanid(), dispatch.getBatchid(), dispatch.getTestcaseid());
                 TestPlanCaseController.log.info("性能任务-调度异常。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。获取 JmeterPerformanceObject对象异常报错..。。。。。。。。。。。。。。。。。。。。。。。。。" + ex.getMessage());
             }
         }
@@ -467,17 +467,29 @@ public class TestPlanCaseController {
             String Paramvalue = apiCasedata.getApiparamvalue();
             String DataType = apiCasedata.getParamstype();
             if (apiCasedata.getPropertytype().equalsIgnoreCase("Params")) {
-                Object Result= GetVaraibaleValue(Paramvalue,InterFaceMap,DBMap);
+                Object Result = Paramvalue;
+                if((Paramvalue.contains("<")&&Paramvalue.contains(">"))||(Paramvalue.contains("<<")&&Paramvalue.contains(">>"))||(Paramvalue.contains("[")&&Paramvalue.contains("]")))
+                {
+                    Result= GetVaraibaleValue(Paramvalue,InterFaceMap,DBMap);
+                }
                 Object LastObjectValue = GetDataByType(Result.toString(), DataType);
                 ParamsMap.put(ParamName,LastObjectValue);
             }
             if (apiCasedata.getPropertytype().equalsIgnoreCase("Header")) {
-                Object Result= GetVaraibaleValue(Paramvalue,InterFaceMap,DBMap);
+                Object Result = Paramvalue;
+                if((Paramvalue.contains("<")&&Paramvalue.contains(">"))||(Paramvalue.contains("<<")&&Paramvalue.contains(">>"))||(Paramvalue.contains("[")&&Paramvalue.contains("]")))
+                {
+                     Result= GetVaraibaleValue(Paramvalue,InterFaceMap,DBMap);
+                }
                 HeaderMap.put(ParamName,Result);
             }
             if (apiCasedata.getPropertytype().equalsIgnoreCase("Body")) {
                 if (RequestContentType.equalsIgnoreCase("Form表单")) {
-                    Object Result= GetVaraibaleValue(Paramvalue,InterFaceMap,DBMap);
+                    Object Result = Paramvalue;
+                    if((Paramvalue.contains("<")&&Paramvalue.contains(">"))||(Paramvalue.contains("<<")&&Paramvalue.contains(">>"))||(Paramvalue.contains("[")&&Paramvalue.contains("]")))
+                    {
+                         Result= GetVaraibaleValue(Paramvalue,InterFaceMap,DBMap);
+                    }
                     Object LastObjectValue = GetDataByType(Result.toString(), DataType);
                     BodyMap.put(ParamName,LastObjectValue);
                 } else {
@@ -563,14 +575,16 @@ public class TestPlanCaseController {
         return flag;
     }
 
-    private Object GetVaraibaleValue(String Value, HashMap<String, String> InterfaceMap, HashMap<String, String> DBMap)
-    {
+    private Object GetVaraibaleValue(String Value, HashMap<String, String> InterfaceMap, HashMap<String, String> DBMap) throws Exception {
         Object ObjectValue=Value;
+        boolean exist=false; //标记是否Value有变量处理，false表示没有对应的子条件处理过
+
         //参数值替换接口变量
         for (String interfacevariablesName:InterfaceMap.keySet()) {
             boolean flag=GetSubOrNot(InterfaceMap,Value,"<",">");
             if(Value.contains("<"+interfacevariablesName+">"))
             {
+                exist=true;
                 String ActualValue = InterfaceMap.get(interfacevariablesName);
                 if(flag)
                 {
@@ -598,6 +612,7 @@ public class TestPlanCaseController {
             boolean flag=GetSubOrNot(DBMap,Value,"<<",">>");
             if(Value.contains("<<"+DBvariablesName+">>"))
             {
+                exist=true;
                 String ActualValue = DBMap.get(DBvariablesName);
                 if(flag)
                 {
@@ -620,6 +635,11 @@ public class TestPlanCaseController {
                 }
             }
         }
+
+        if(!exist)
+        {
+            throw new Exception("当前用例参数值中存在变量："+Value+" 未找到对应值，请检查是否有配置对应变量的子条件获取此变量值");
+        }
         return ObjectValue;
     }
 
@@ -630,7 +650,11 @@ public class TestPlanCaseController {
         for (ExecuteplanParams executeplanParams : executeplanHeaderParamList) {
             String ParamName = executeplanParams.getKeyname();
             String ParamValue = executeplanParams.getKeyvalue();
-            Object Result= GetVaraibaleValue(ParamValue,InterfaceMap,DBMap);
+            Object Result= ParamValue;
+            if((ParamValue.contains("<")&&ParamValue.contains(">"))||(ParamValue.contains("<<")&&ParamValue.contains(">>"))||(ParamValue.contains("[")&&ParamValue.contains("]")))
+            {
+                 Result= GetVaraibaleValue(ParamValue,InterfaceMap,DBMap);
+            }
             HeaderMap.put(ParamName, Result);
         }
         return HeaderMap;

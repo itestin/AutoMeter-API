@@ -11,6 +11,7 @@ import com.zoctan.api.dto.*;
 import com.zoctan.api.entity.*;
 import com.zoctan.api.service.*;
 import com.zoctan.api.util.RadomVariables;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,7 @@ import java.util.*;
  * @author Zoctan
  * @date 2020/09/11
  */
+@Slf4j
 @RestController
 @RequestMapping("/apicases")
 public class ApicasesController {
@@ -347,35 +349,68 @@ public class ApicasesController {
                 conditionmap.put("conditionid", ConditionID);
                 List<ConditionOrder> conditionOrderList = conditionOrderService.findconditionorderWithid(conditionmap);
                 param.put("ConditionID", ConditionID);
+
                 HttpHeader header = new HttpHeader();
-                String params = JSON.toJSONString(param);
                 try {
                     if (conditionOrderList.size() > 0) {
                         for (ConditionOrder conditionOrder : conditionOrderList) {
+                            param.put("dbvariablesvalue", DBRespone);
+                            String params = JSON.toJSONString(param);
                             if (conditionOrder.getSubconditiontype().equals("接口")) {
+                                ApicasesController.log.info("。。。。。。。。接口前置子条件请求数据："+params);
                                 APIRespone = getSubConditionRespone(APIConditionServerurl, params, header);
                             }
                             if (conditionOrder.getSubconditiontype().equals("数据库")) {
                                 DBRespone=getSubConditionRespone(DBConditionServerurl, params, header);
+                                param.put("dbvariablesvalue", DBRespone);
                             }
                             if (conditionOrder.getSubconditiontype().equals("脚本")) {
                                 getSubConditionRespone(ScriptConditionServerurl, params, header);
                             }
                         }
                     } else {
-                        APIRespone = getSubConditionRespone(APIConditionServerurl, params, header);
-                        getSubConditionRespone(ScriptConditionServerurl, params, header);
-                        DBRespone=getSubConditionRespone(DBConditionServerurl, params, header);
+                        String params = JSON.toJSONString(param);
+                        Condition dbcon=new Condition(ConditionDb.class);
+                        dbcon.createCriteria().andCondition("conditionid="+ConditionID);
+                        List<ConditionDb> conditionDbList= conditionDbService.listByCondition(dbcon);
+                        if(conditionDbList.size()>0)
+                        {
+                            ApicasesController.log.info("。。。。。。。。数据库前置子条件非顺序请求数据："+params);
+                            DBRespone=getSubConditionRespone(DBConditionServerurl, params, header);
+                        }
+                        param.put("dbvariablesvalue", DBRespone);
+                        ApicasesController.log.info("。。。。。。。。数据库前置子条件非顺序结果："+DBRespone);
+                        Condition apicon=new Condition(ConditionApi.class);
+                        apicon.createCriteria().andCondition("conditionid="+ConditionID);
+                        List<ConditionApi> conditionApiList= conditionApiService.listByCondition(apicon);
+                        if(conditionApiList.size()>0)
+                        {
+                            params = JSON.toJSONString(param);
+                            ApicasesController.log.info("。。。。。。。。接口前置子条件非顺序请求数据："+params);
+                            APIRespone = getSubConditionRespone(APIConditionServerurl, params, header);
+                        }
+
+                        Condition scriptcon=new Condition(ConditionScript.class);
+                        scriptcon.createCriteria().andCondition("conditionid="+ConditionID);
+                        List<ConditionScript> conditionScriptList= conditionScriptService.listByCondition(scriptcon);
+
+                        if(conditionScriptList.size()>0)
+                        {
+                            ApicasesController.log.info("。。。。。。。。脚本前置子条件非顺序请求数据："+params);
+                            getSubConditionRespone(ScriptConditionServerurl, params, header);
+                        }
                     }
                 } catch (Exception ex) {
                     if (ex.getMessage().contains("Connection refused")) {
                         return ResultGenerator.genFailedResult("无法连接条件服务器，请检查ConditionService是否正常启动！");
                     } else {
-                        return ResultGenerator.genFailedResult("执行前置条件异常：" + ex.getMessage());
+                        return ResultGenerator.genFailedResult(ex.getMessage());
                     }
                 }
             }
-            if (APIRespone != "") {
+            ApicasesController.log.info("。。。。。。。。接口前置子条件响应数据："+APIRespone);
+
+            if (!APIRespone.isEmpty()) {
                 try {
                     JSONObject jsonObject = JSON.parseObject(APIRespone);
                     for (Map.Entry<String, Object> objectEntry : jsonObject.getJSONObject("data").entrySet()) {
@@ -387,7 +422,9 @@ public class ApicasesController {
                     return ResultGenerator.genFailedResult("执行前置接口条件结果异常：" + APIRespone);
                 }
             }
-            if (DBRespone != "") {
+            ApicasesController.log.info("。。。。。。。。数据库前置子条件响应数据："+DBRespone);
+
+            if (!DBRespone.isEmpty()) {
                 try {
                     JSONObject jsonObject = JSON.parseObject(DBRespone);
                     for (Map.Entry<String, Object> objectEntry : jsonObject.getJSONObject("data").entrySet()) {
@@ -444,6 +481,8 @@ public class ApicasesController {
                 RadomHashMap.put(va.getVariablesname(), va.getVariablestype());
             }
 
+            ApicasesController.log.info("。。。。。。。。处理前的resource Url："+resource);
+
             //url中的变量替换
             //1.随机变量替换
             for (Variables variables : variablesList) {
@@ -470,6 +509,9 @@ public class ApicasesController {
                     resource = resource.replace(UseDBvariables, VariableValue.toString());
                 }
             }
+
+            ApicasesController.log.info("。。。。。。。。处理后的resource Url："+resource);
+
 
             List<ApiCasedata> HeaderApiCasedataList = apiCasedataService.getparamvaluebycaseidandtype(Caseid, "Header");
             List<ApiCasedata> ParamsApiCasedataList = apiCasedataService.getparamvaluebycaseidandtype(Caseid, "Params");
@@ -539,7 +581,7 @@ public class ApicasesController {
                 long Start = new Date().getTime();
                 TestHttp testHttp = new TestHttp();
                 String VisitType = api.getVisittype();
-                TestResponeData respon = testHttp.doService(Protocal, ApiStyle, resource, header, paramers, PostData, VisitType, requestcontenttype, 300);
+                TestResponeData respon = testHttp.doService(Protocal, ApiStyle, resource, header, paramers, PostData, VisitType, requestcontenttype, 3000);
                 long End = new Date().getTime();
                 long CostTime = End - Start;
                 respon.setResponeTime(CostTime);
@@ -588,7 +630,11 @@ public class ApicasesController {
         for (ApiCasedata Headdata : HeaderApiCasedataList) {
             String HeaderName = Headdata.getApiparam();
             String HeaderValue = Headdata.getApiparamvalue();
-            Object Result = GetVaraibaleValue(HeaderValue, RadomMap, ParamsValuesMap,DBMap);
+            Object Result = HeaderValue;
+            if((HeaderValue.contains("<")&&HeaderValue.contains(">"))||(HeaderValue.contains("<<")&&HeaderValue.contains(">>"))||(HeaderValue.contains("[")&&HeaderValue.contains("]")))
+            {
+                Result = GetVaraibaleValue(HeaderValue, RadomMap, ParamsValuesMap,DBMap);
+            }
             header.addParam(HeaderName, Result);
         }
         return header;
@@ -601,7 +647,10 @@ public class ApicasesController {
             String ParamName = Paramdata.getApiparam();
             String ParamValue = Paramdata.getApiparamvalue();
             String DataType = Paramdata.getParamstype();
-            Object ObjectResult = GetVaraibaleValue(ParamValue, RadomMap, ParamsValuesMap,DBMap);
+            Object ObjectResult = ParamValue;
+            if((ParamValue.contains("<")&&ParamValue.contains(">"))||(ParamValue.contains("<<")&&ParamValue.contains(">>"))||(ParamValue.contains("[")&&ParamValue.contains("]"))) {
+                ObjectResult = GetVaraibaleValue(ParamValue, RadomMap, ParamsValuesMap,DBMap);
+            }
             Object Result = GetDataByType(ObjectResult.toString(), DataType);
             paramers.addParam(ParamName, Result);
         }
@@ -610,10 +659,12 @@ public class ApicasesController {
 
     private Object GetVaraibaleValue(String Value, HashMap<String, String> RadomMap, HashMap<String, String> InterfaceMap, HashMap<String, String> DBMap) throws Exception {
         Object ObjectValue = Value;
+        boolean exist=false; //标记是否Value有变量处理，false表示没有对应的子条件处理过
         //参数值替换接口变量
         for (String interfacevariablesName : InterfaceMap.keySet()) {
             boolean flag = GetSubOrNot(InterfaceMap, Value, "<", ">");
             if (Value.contains("<" + interfacevariablesName + ">")) {
+                exist=true;
                 String ActualValue = InterfaceMap.get(interfacevariablesName);
                 if (flag) {
                     //有拼接认为是字符串
@@ -634,6 +685,7 @@ public class ApicasesController {
         for (String DBvariablesName : DBMap.keySet()) {
             boolean flag = GetSubOrNot(DBMap, Value, "<<", ">>");
             if (Value.contains("<<" + DBvariablesName + ">>")) {
+                exist=true;
                 String ActualValue = DBMap.get(DBvariablesName);
                 if (flag) {
                     //有拼接认为是字符串
@@ -654,6 +706,7 @@ public class ApicasesController {
         for (String variables : RadomMap.keySet()) {
             boolean flag = GetSubOrNot(RadomMap, Value, "[", "]");
             if (Value.contains("[" + variables + "]")) {
+                exist=true;
                 if (flag) {
                     Object RadomValue = GetRadomValue(variables);
                     Value = Value.replace("[" + variables + "]", RadomValue.toString());
@@ -662,6 +715,10 @@ public class ApicasesController {
                     ObjectValue = GetRadomValue(variables);
                 }
             }
+        }
+        if(!exist)
+        {
+            throw new Exception("当前用例参数值中存在变量："+Value+" 未找到对应值，请检查是否执行前置条件，或者是否有配置变量对应的前置子条件获取此变量值");
         }
         return ObjectValue;
     }
