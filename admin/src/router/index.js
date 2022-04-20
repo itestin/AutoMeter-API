@@ -41,7 +41,8 @@ export const constantRouterMap = [
     name: 'Dashboard',
     icon: 'dashboard',
     children: [
-      { path: 'Dashboard', name: '首页', component: _import('dashboard/index'), meta: { title: '首页', icon: 'dashboard', noCache: true }}
+      { path: 'Dashboard', name: '首页', component: _import('dashboard/dashboard/index'), meta: { title: '首页', icon: 'dashboard', noCache: true }},
+      { path: 'myinfo', name: '我的总览', component: _import('dashboard/myinfo/index'), meta: { title: '我的总览', icon: 'dashboard', noCache: true }}
     ]
   }
 ]
@@ -126,8 +127,9 @@ export const asyncRouterMap = [
       // { path: 'testconditionreport/list', name: '条件执行报告', component: _import('reportcenter/testconditionreport/index'), meta: { title: '条件执行报告', permission: ['testconditionreport:list'] }},
       { path: 'apinewreport/list', name: '集合功能报告', component: _import('reportcenter/apinewreport/index'), meta: { title: '集合功能报告', permission: ['apireport:list'] }},
       { path: 'apireport/list', name: '功能报告明细', component: _import('reportcenter/apireport/index'), meta: { title: '功能报告明细', permission: ['apireport:list'] }},
+      { path: 'apinewperreport/list', name: '集合性能报告', component: _import('reportcenter/apinewperreport/index'), meta: { title: '集合性能报告', permission: ['apireport:list'] }},
       // { path: 'apireportstatics/list', name: '功能统计报告', component: _import('reportcenter/apireportstatics/index'), meta: { title: '功能统计报告', permission: ['apireportstatics:list'] }},
-      { path: 'apiperformancereport/list', name: '性能明细报告', component: _import('reportcenter/apiperformancereport/index'), meta: { title: '性能明细报告', permission: ['apiperformancereport:list'] }},
+      // { path: 'apiperformancereport/list', name: '性能明细报告', component: _import('reportcenter/apiperformancereport/index'), meta: { title: '性能明细报告', permission: ['apiperformancereport:list'] }},
       { path: 'apiperformancestatistics/list', name: '性能统计报告', component: _import('reportcenter/apiperformancestatistics/index'), meta: { title: '性能统计报告', permission: ['apiperformancestatistics:list'] }}
     ]
   },
